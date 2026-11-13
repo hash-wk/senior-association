@@ -1,15 +1,134 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+enum MemberStatus {
+  ACTIVE
+  INACTIVE
+  DECEASED
+}
+
+enum Relationship {
+  FATHER
+  MOTHER
+  CHILD
+  FATHER_IN_LAW
+  MOTHER_IN_LAW
+}
+
+enum PaymentType {
+  NEW_MEMBERSHIP
+  MONTHLY
+  ANNUAL
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+}
+
+enum Role {
+  ADMIN
+  TREASURER
+  SECRETARY
+}
+
+model Member {
+  id         Int            @id @default(autoincrement())
+  fullName   String
+  nic        String         @unique
+  phone      String?
+  address    String?
+  village    String?
+  joinDate   DateTime
+  status     MemberStatus   @default(ACTIVE)
+  createdAt  DateTime       @default(now())
+
+  relatives  FamilyRelation[]
+  payments   Payment[]
+  attendance Attendance[]
+  claims     FuneralClaim[]
+}
+
+model FamilyRelation {
+  id           Int          @id @default(autoincrement())
+  memberId     Int
+  name         String
+  relationship Relationship
+  isDeceased   Boolean      @default(false)
+
+  member       Member       @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  claims       FuneralClaim[]
+}
+
+model Payment {
+  id          Int         @id @default(autoincrement())
+  memberId    Int
+  type        PaymentType
+  amount      Decimal     @db.Decimal(10, 2)
+  paidAt      DateTime    @default(now())
+  periodMonth Int?        // 1-12, for MONTHLY payments
+  periodYear  Int?        // for MONTHLY and ANNUAL
+  receivedBy  String?
+  note        String?
+
+  member      Member      @relation(fields: [memberId], references: [id])
+
+  // One monthly payment per member per month
+  @@unique([memberId, type, periodYear, periodMonth])
+  @@index([memberId])
+}
+
+model Meeting {
+  id         Int          @id @default(autoincrement())
+  title      String
+  date       DateTime
+  isAnnual   Boolean      @default(false)
+
+  attendance Attendance[]
+}
+
+model Attendance {
+  id        Int              @id @default(autoincrement())
+  meetingId Int
+  memberId  Int
+  status    AttendanceStatus @default(PRESENT)
+
+  meeting   Meeting          @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  member    Member           @relation(fields: [memberId], references: [id])
+
+  @@unique([meetingId, memberId])
+}
+
+model FuneralClaim {
+  id                    Int            @id @default(autoincrement())
+  memberId              Int
+  relativeId            Int?           // null if the member themselves passed away
+  deceasedName          String
+  dateOfDeath           DateTime
+  amountPaid            Decimal        @db.Decimal(10, 2)
+  paidMonthsAtClaimTime Int            // snapshot of the eligibility check
+  overrideReason        String?        // filled only if the 5-month rule was overridden
+  approvedBy            String
+  createdAt             DateTime       @default(now())
+
+  member                Member         @relation(fields: [memberId], references: [id])
+  relative              FamilyRelation? @relation(fields: [relativeId], references: [id])
+}
+
+model Setting {
+  key   String @id
+  value String
+}
+
+model User {
+  id           Int    @id @default(autoincrement())
+  email        String @unique
+  passwordHash String
+  role         Role
 }
