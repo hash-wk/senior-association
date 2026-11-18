@@ -38,3 +38,29 @@ export type MemberDetail = Member & {
   payments: Payment[];
   eligibility: Eligibility;
 };
+
+export type Meeting = {
+  id: number;
+  title: string;
+  date: string;
+  isAnnual: boolean;
+  presentCount: number;
+};
+
+export type AttendanceRow = {
+  memberId: number;
+  fullName: string;
+  nic: string;
+  village: string | null;
+  present: boolean;
+  annualPaid: boolean;
+};
+
+export type MeetingDetail = {
+  id: number;
+  title: string;
+  date: string;
+  isAnnual: boolean;
+  year: number;
+  members: AttendanceRow[];
+};
