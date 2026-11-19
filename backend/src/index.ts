@@ -5,6 +5,7 @@ import cors from "cors";
 import membersRouter from "./routes/members.js";
 import paymentsRouter from "./routes/payments.js";
 import meetingsRouter from "./routes/meetings.js";
+import claimsRouter from "./routes/claims.js";
 
 const app = express();
 app.use(cors({ origin: "http://localhost:3000" }));
@@ -17,6 +18,7 @@ app.get("/api/health", (_req, res) => {
 app.use("/api/members", membersRouter);
 app.use("/api/payments", paymentsRouter);
 app.use("/api/meetings", meetingsRouter);
+app.use("/api/claims", claimsRouter);
 
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   console.error(err);

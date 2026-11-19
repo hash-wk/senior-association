@@ -4,6 +4,7 @@ export type Relative = {
   id: number;
   name: string;
   relationship: string;
+  isDeceased: boolean;
 };
 
 export type Member = {
@@ -63,4 +64,17 @@ export type MeetingDetail = {
   isAnnual: boolean;
   year: number;
   members: AttendanceRow[];
+};
+
+export type Claim = {
+  id: number;
+  memberId: number;
+  memberName: string;
+  deceasedName: string;
+  relationship: string;
+  dateOfDeath: string;
+  amountPaid: string;
+  paidMonthsAtClaimTime: number;
+  overrideReason: string | null;
+  approvedBy: string;
 };

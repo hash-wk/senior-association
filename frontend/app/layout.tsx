@@ -21,6 +21,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               <Link href="/meetings" className="text-sm font-medium !text-blue-100 hover:!text-white">
               Meetings
               </Link>
+              <Link href="/claims" className="text-sm font-medium text-blue-100! hover:text-white!">
+              Claims
+              </Link>
           </nav>
         </header>
         {children}
