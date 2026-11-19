@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "../lib/prisma.js";
+import { requireRole } from "../lib/auth.js";
 
 const router = Router();
 
@@ -28,7 +29,7 @@ router.get("/", async (_req, res) => {
 });
 
 // Create a meeting
-router.post("/", async (req, res) => {
+router.post("/", requireRole("ADMIN", "SECRETARY"), async (req, res) => {
   const parsed = meetingSchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ errors: parsed.error.flatten() });
@@ -79,7 +80,7 @@ const attendanceSchema = z.object({
   presentMemberIds: z.array(z.number().int()),
 });
 
-router.put("/:id/attendance", async (req, res) => {
+router.put("/:id/attendance", requireRole("ADMIN", "SECRETARY"), async (req, res) => {
   const id = Number(req.params.id);
   const parsed = attendanceSchema.safeParse(req.body);
   if (!parsed.success) {

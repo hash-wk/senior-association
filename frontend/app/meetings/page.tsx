@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { API_URL, type Meeting } from "@/lib/api";
+import { apiFetch, API_URL, type Meeting } from "@/lib/api";
 
 export default function MeetingsPage() {
   const [meetings, setMeetings] = useState<Meeting[]>([]);
@@ -18,7 +18,7 @@ export default function MeetingsPage() {
     let cancelled = false;
     async function fetchMeetings() {
       try {
-        const res = await fetch(`${API_URL}/api/meetings`);
+        const res = await apiFetch(`${API_URL}/api/meetings`);
         if (!res.ok) throw new Error();
         const data = await res.json();
         if (cancelled) return;
@@ -37,7 +37,7 @@ export default function MeetingsPage() {
   async function createMeeting() {
     setSaving(true);
     try {
-      const res = await fetch(`${API_URL}/api/meetings`, {
+      const res = await apiFetch(`${API_URL}/api/meetings`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title, date, isAnnual }),

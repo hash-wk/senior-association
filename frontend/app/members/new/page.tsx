@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { API_URL } from "@/lib/api";
+import { apiFetch, API_URL } from "@/lib/api";
 
 const RELATIONSHIPS = [
   ["FATHER", "Father"],
@@ -36,7 +36,7 @@ export default function NewMemberPage() {
     setSaving(true);
     setError("");
     try {
-      const res = await fetch(`${API_URL}/api/members`, {
+      const res = await apiFetch(`${API_URL}/api/members`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

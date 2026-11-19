@@ -2,6 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "../lib/prisma.js";
 import { getEligibility } from "../lib/eligibility.js";
+import { requireRole } from "../lib/auth.js";
 
 const router = Router();
 
@@ -10,7 +11,6 @@ const claimSchema = z.object({
   relativeId: z.number().int().nullable().optional(), // null = the member themselves
   dateOfDeath: z.coerce.date(),
   amountPaid: z.number().positive(),
-  approvedBy: z.string().trim().min(1),
   overrideReason: z.string().trim().optional(),
 });
 
@@ -40,13 +40,14 @@ router.get("/", async (_req, res) => {
 });
 
 // Create a claim
-router.post("/", async (req, res) => {
+router.post("/", requireRole("ADMIN", "TREASURER"), async (req, res) => {
   const parsed = claimSchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: "Please check the form.", errors: parsed.error.flatten() });
     return;
   }
-  const { memberId, relativeId, dateOfDeath, amountPaid, approvedBy } = parsed.data;
+  const { memberId, relativeId, dateOfDeath, amountPaid } = parsed.data;
+  const approvedBy = req.user!.name;
   const overrideReason = parsed.data.overrideReason || undefined;
 
   const member = await prisma.member.findUnique({ where: { id: memberId } });

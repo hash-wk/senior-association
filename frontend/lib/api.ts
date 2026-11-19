@@ -98,3 +98,14 @@ export type Dashboard = {
     amountPaid: number;
   }[];
 };
+
+export async function apiFetch(input: string, init: RequestInit = {}) {
+  const res = await fetch(input, { ...init, credentials: "include" });
+  if (res.status === 401 && typeof window !== "undefined" && !window.location.pathname.startsWith("/login")) {
+    window.location.href = "/login";
+  }
+  if (res.status === 403 && typeof window !== "undefined") {
+    alert("You do not have permission to do this.");
+  }
+  return res;
+}

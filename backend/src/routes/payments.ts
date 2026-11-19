@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "../lib/prisma.js";
+import { requireRole } from "../lib/auth.js";
 
 const router = Router();
 
@@ -21,14 +22,16 @@ const paymentSchema = z
     message: "Annual payments need periodYear",
   });
 
-router.post("/", async (req, res) => {
+router.post("/", requireRole("ADMIN", "TREASURER"), async (req, res) => {
   const parsed = paymentSchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ errors: parsed.error.flatten() });
     return;
   }
   try {
-    const payment = await prisma.payment.create({ data: parsed.data });
+    const payment = await prisma.payment.create({
+  data: { ...parsed.data, receivedBy: req.user!.name },
+});
     res.status(201).json(payment);
   } catch (e: any) {
     if (e.code === "P2002") {

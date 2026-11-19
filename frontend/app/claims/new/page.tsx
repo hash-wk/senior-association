@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { API_URL, type Member, type MemberDetail } from "@/lib/api";
+import { apiFetch, API_URL, type Member, type MemberDetail } from "@/lib/api";
 
 export default function NewClaimPage() {
   const router = useRouter();
@@ -15,7 +15,6 @@ export default function NewClaimPage() {
   const [who, setWho] = useState("SELF");
   const [dateOfDeath, setDateOfDeath] = useState(new Date().toISOString().slice(0, 10));
   const [amount, setAmount] = useState("");
-  const [approvedBy, setApprovedBy] = useState("");
   const [reason, setReason] = useState("");
 
   const [error, setError] = useState("");
@@ -26,7 +25,7 @@ export default function NewClaimPage() {
     if (!q.trim()) return;
     const timer = setTimeout(async () => {
       try {
-        const res = await fetch(`${API_URL}/api/members?q=${encodeURIComponent(q.trim())}`);
+        const res = await apiFetch(`${API_URL}/api/members?q=${encodeURIComponent(q.trim())}`);
         if (res.ok) setResults(await res.json());
       } catch {
         setError("Could not search members. Is the backend running?");
@@ -41,7 +40,7 @@ export default function NewClaimPage() {
     let cancelled = false;
     async function load() {
       try {
-        const res = await fetch(`${API_URL}/api/members/${selectedId}`);
+        const res = await apiFetch(`${API_URL}/api/members/${selectedId}`);
         if (!res.ok) throw new Error();
         const data: MemberDetail = await res.json();
         if (!cancelled) setMember(data);
@@ -74,11 +73,10 @@ export default function NewClaimPage() {
         relativeId: who === "SELF" ? null : Number(who),
         dateOfDeath,
         amountPaid: Number(amount),
-        approvedBy,
       };
       if (!member.eligibility.eligible) body.overrideReason = reason;
 
-      const res = await fetch(`${API_URL}/api/claims`, {
+      const res = await apiFetch(`${API_URL}/api/claims`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -98,13 +96,13 @@ export default function NewClaimPage() {
 
   const e = member?.eligibility;
   const candidates = member?.relatives.filter((r) => !r.isDeceased) ?? [];
+
   const missing: string[] = [];
-if (!member) missing.push("a member");
-if (!dateOfDeath) missing.push("date of death");
-if (!(Number(amount) > 0)) missing.push("amount");
-if (!approvedBy.trim()) missing.push("approved by");
-if (e && !e.eligible && reason.trim().length < 3) missing.push("override reason");
-const canSave = missing.length === 0;
+  if (!member) missing.push("a member");
+  if (!dateOfDeath) missing.push("date of death");
+  if (!(Number(amount) > 0)) missing.push("amount");
+  if (e && !e.eligible && reason.trim().length < 3) missing.push("override reason");
+  const canSave = missing.length === 0;
 
   return (
     <main className="mx-auto w-full max-w-2xl p-6">
@@ -205,15 +203,6 @@ const canSave = missing.length === 0;
                 onChange={(ev) => setAmount(ev.target.value)}
               />
             </label>
-            <label className="block text-sm">
-              Approved by
-              <input
-                className="w-full"
-                placeholder="Name of the committee member approving"
-                value={approvedBy}
-                onChange={(ev) => setApprovedBy(ev.target.value)}
-              />
-            </label>
             {!e.eligible && (
               <label className="block text-sm">
                 Override reason (required)
@@ -232,9 +221,9 @@ const canSave = missing.length === 0;
 
       {error && <p className="mt-4 text-red-600">{error}</p>}
 
-        {member && missing.length > 0 && (
+      {member && missing.length > 0 && (
         <p className="mt-4 text-sm text-amber-700">Still needed: {missing.join(", ")}.</p>
-        )}
+      )}
 
       <div className="mt-6">
         <button

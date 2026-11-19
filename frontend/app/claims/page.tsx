@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { API_URL, type Claim } from "@/lib/api";
+import { apiFetch, API_URL, type Claim } from "@/lib/api";
 
 export default function ClaimsPage() {
   const [claims, setClaims] = useState<Claim[]>([]);
@@ -12,7 +12,7 @@ export default function ClaimsPage() {
     let cancelled = false;
     async function load() {
       try {
-        const res = await fetch(`${API_URL}/api/claims`);
+        const res = await apiFetch(`${API_URL}/api/claims`);
         if (!res.ok) throw new Error();
         const data = await res.json();
         if (!cancelled) setClaims(data);

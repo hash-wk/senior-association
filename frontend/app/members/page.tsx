@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { API_URL, type Member } from "@/lib/api";
+import { apiFetch, API_URL, type Member } from "@/lib/api";
 
 const STATUS_STYLES: Record<string, string> = {
   ACTIVE: "bg-green-100 text-green-800",
@@ -20,7 +20,7 @@ export default function MembersPage() {
     const timer = setTimeout(async () => {
       try {
         setLoading(true);
-        const res = await fetch(`${API_URL}/api/members?q=${encodeURIComponent(q)}`);
+        const res = await apiFetch(`${API_URL}/api/members?q=${encodeURIComponent(q)}`);
         if (!res.ok) throw new Error("Request failed");
         setMembers(await res.json());
         setError("");

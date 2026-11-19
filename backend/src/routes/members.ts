@@ -2,6 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "../lib/prisma.js";
 import { getEligibility } from "../lib/eligibility.js";
+import { requireRole } from "../lib/auth.js";
 
 const router = Router();
 
@@ -21,6 +22,8 @@ const memberSchema = z.object({
     )
     .default([]),
 });
+
+
 
 // List + search: GET /api/members?q=kamal
 router.get("/", async (req, res) => {
@@ -42,7 +45,7 @@ router.get("/", async (req, res) => {
 });
 
 // Create a member with relatives
-router.post("/", async (req, res) => {
+router.post("/", requireRole("ADMIN", "SECRETARY"), async (req, res) => {
   const parsed = memberSchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ errors: parsed.error.flatten() });

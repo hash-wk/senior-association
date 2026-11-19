@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { API_URL, type Dashboard } from "@/lib/api";
+import { apiFetch, API_URL, type Dashboard } from "@/lib/api";
 
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const TYPE_LABELS: Record<string, string> = {
@@ -30,7 +30,7 @@ export default function DashboardPage() {
     let cancelled = false;
     async function load() {
       try {
-        const res = await fetch(`${API_URL}/api/dashboard`);
+        const res = await apiFetch(`${API_URL}/api/dashboard`);
         if (!res.ok) throw new Error();
         const json = await res.json();
         if (!cancelled) setData(json);

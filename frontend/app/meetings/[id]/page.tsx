@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { API_URL, type MeetingDetail } from "@/lib/api";
+import { apiFetch, API_URL, type MeetingDetail } from "@/lib/api";
 
 export default function AttendancePage() {
   const { id } = useParams<{ id: string }>();
@@ -18,7 +18,7 @@ export default function AttendancePage() {
     let cancelled = false;
     async function fetchMeeting() {
       try {
-        const res = await fetch(`${API_URL}/api/meetings/${id}`);
+        const res = await apiFetch(`${API_URL}/api/meetings/${id}`);
         if (res.status === 404) {
           if (!cancelled) setError("Meeting not found.");
           return;
@@ -74,7 +74,7 @@ export default function AttendancePage() {
     setSaving(true);
     setMessage("");
     try {
-      const res = await fetch(`${API_URL}/api/meetings/${id}/attendance`, {
+      const res = await apiFetch(`${API_URL}/api/meetings/${id}/attendance`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ presentMemberIds: [...present] }),

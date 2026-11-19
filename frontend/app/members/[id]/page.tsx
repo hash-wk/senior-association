@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { API_URL, type MemberDetail } from "@/lib/api";
+import { apiFetch, API_URL, type MemberDetail } from "@/lib/api";
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
@@ -25,7 +25,7 @@ export default function MemberDetailPage() {
 
     async function fetchMember() {
       try {
-        const res = await fetch(`${API_URL}/api/members/${id}`);
+        const res = await apiFetch(`${API_URL}/api/members/${id}`);
         if (cancelled) return;
         if (res.status === 404) {
           setError("Member not found.");
@@ -62,7 +62,7 @@ export default function MemberDetailPage() {
       }
       if (type === "ANNUAL") body.periodYear = year;
 
-      const res = await fetch(`${API_URL}/api/payments`, {
+      const res = await apiFetch(`${API_URL}/api/payments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
