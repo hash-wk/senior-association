@@ -78,3 +78,23 @@ export type Claim = {
   overrideReason: string | null;
   approvedBy: string;
 };
+
+export type Dashboard = {
+  month: number;
+  year: number;
+  totalIn: number;
+  totalOut: number;
+  balance: number;
+  claimsCount: number;
+  activeMembers: number;
+  incomeByType: { type: string; total: number }[];
+  overdueMonthly: { id: number; fullName: string; village: string | null; phone: string | null }[];
+  annualUnpaid: number;
+  recentClaims: {
+    id: number;
+    deceasedName: string;
+    memberName: string;
+    dateOfDeath: string;
+    amountPaid: number;
+  }[];
+};
