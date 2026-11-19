@@ -109,3 +109,13 @@ export async function apiFetch(input: string, init: RequestInit = {}) {
   }
   return res;
 }
+
+export type AuditEntry = {
+  id: number;
+  userName: string;
+  action: string;
+  entity: string;
+  entityId: number | null;
+  summary: string;
+  createdAt: string;
+};

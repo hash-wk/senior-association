@@ -53,6 +53,11 @@ export default function NavBar() {
             {label}
           </Link>
         ))}
+        {me?.role === "ADMIN" && (
+            <Link href="/audit" className="text-sm font-medium text-blue-100! hover:text-white!">
+                Audit log
+            </Link>
+        )}
         {me && (
           <div className="ml-auto flex items-center gap-3 text-sm text-blue-100">
             <span>

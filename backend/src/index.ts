@@ -10,6 +10,7 @@ import paymentsRouter from "./routes/payments.js";
 import meetingsRouter from "./routes/meetings.js";
 import claimsRouter from "./routes/claims.js";
 import dashboardRouter from "./routes/dashboard.js";
+import auditRouter from "./routes/audit.js";
 
 const app = express();
 app.use(cors({ origin: "http://localhost:3000", credentials: true }));
@@ -26,8 +27,13 @@ app.use("/api/payments", requireAuth, paymentsRouter);
 app.use("/api/meetings", requireAuth, meetingsRouter);
 app.use("/api/claims", requireAuth, claimsRouter);
 app.use("/api/dashboard", requireAuth, dashboardRouter);
+app.use("/api/audit", requireAuth, auditRouter);
 
-app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
+app.use((err: Error, _req: Request, res: Response, next: NextFunction) => {
+  if (res.headersSent) {
+    next(err);
+    return;
+  }
   console.error(err);
   res.status(500).json({ error: "Something went wrong" });
 });

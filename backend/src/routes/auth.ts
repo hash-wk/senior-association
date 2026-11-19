@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import { prisma } from "../lib/prisma.js";
 import { COOKIE_NAME, cookieOptions, requireAuth, signToken } from "../lib/auth.js";
 import { rateLimit } from "express-rate-limit";
+import { logAudit } from "../lib/audit.js";
 
 const router = Router();
 
@@ -35,6 +36,7 @@ router.post("/login", loginLimiter, async (req, res) => {
     return;
   }
   res.cookie(COOKIE_NAME, signToken(user.id), { ...cookieOptions, maxAge: 8 * 60 * 60 * 1000 });
+  await logAudit({ id: user.id, name: user.name }, "LOGIN", "User", user.id, "Logged in");
   res.json({ id: user.id, name: user.name, email: user.email, role: user.role });
 });
 

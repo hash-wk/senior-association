@@ -2,6 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "../lib/prisma.js";
 import { requireRole } from "../lib/auth.js";
+import { logAudit } from "../lib/audit.js";
 
 const router = Router();
 
@@ -12,7 +13,6 @@ const paymentSchema = z
     amount: z.number().positive(),
     periodMonth: z.number().int().min(1).max(12).optional(),
     periodYear: z.number().int().min(2000).optional(),
-    receivedBy: z.string().optional(),
     note: z.string().optional(),
   })
   .refine((d) => d.type !== "MONTHLY" || (d.periodMonth && d.periodYear), {
@@ -30,8 +30,15 @@ router.post("/", requireRole("ADMIN", "TREASURER"), async (req, res) => {
   }
   try {
     const payment = await prisma.payment.create({
-  data: { ...parsed.data, receivedBy: req.user!.name },
-});
+      data: { ...parsed.data, receivedBy: req.user!.name },
+    });
+    await logAudit(
+      req.user,
+      "RECORD_PAYMENT",
+      "Payment",
+      payment.id,
+      `Recorded ${payment.type} payment of ${payment.amount} for member #${payment.memberId}`
+    );
     res.status(201).json(payment);
   } catch (e: any) {
     if (e.code === "P2002") {

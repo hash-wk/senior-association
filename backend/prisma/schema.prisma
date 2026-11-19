@@ -133,3 +133,16 @@ model User {
   passwordHash String
   role         Role
 }
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int?
+  userName  String
+  action    String
+  entity    String
+  entityId  Int?
+  summary   String
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}

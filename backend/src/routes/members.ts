@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "../lib/prisma.js";
 import { getEligibility } from "../lib/eligibility.js";
 import { requireRole } from "../lib/auth.js";
+import { logAudit } from "../lib/audit.js";
 
 const router = Router();
 
@@ -22,8 +23,6 @@ const memberSchema = z.object({
     )
     .default([]),
 });
-
-
 
 // List + search: GET /api/members?q=kamal
 router.get("/", async (req, res) => {
@@ -57,6 +56,13 @@ router.post("/", requireRole("ADMIN", "SECRETARY"), async (req, res) => {
       data: { ...data, relatives: { create: relatives } },
       include: { relatives: true },
     });
+    await logAudit(
+      req.user,
+      "CREATE_MEMBER",
+      "Member",
+      member.id,
+      `Added member ${member.fullName} (${member.nic})`
+    );
     res.status(201).json(member);
   } catch (e: any) {
     if (e.code === "P2002") {

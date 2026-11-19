@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "../lib/prisma.js";
 import { getEligibility } from "../lib/eligibility.js";
 import { requireRole } from "../lib/auth.js";
+import { logAudit } from "../lib/audit.js";
 
 const router = Router();
 
@@ -115,6 +116,14 @@ router.post("/", requireRole("ADMIN", "TREASURER"), async (req, res) => {
     return created;
   });
 
+  await logAudit(
+    req.user,
+    "RECORD_CLAIM",
+    "FuneralClaim",
+    claim.id,
+    `Funeral claim of ${claim.amountPaid} for ${claim.deceasedName}` +
+      (claim.overrideReason ? ` (override: ${claim.overrideReason})` : "")
+  );
   res.status(201).json(claim);
 });
 

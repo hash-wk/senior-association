@@ -2,6 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "../lib/prisma.js";
 import { requireRole } from "../lib/auth.js";
+import { logAudit } from "../lib/audit.js";
 
 const router = Router();
 
@@ -36,6 +37,7 @@ router.post("/", requireRole("ADMIN", "SECRETARY"), async (req, res) => {
     return;
   }
   const meeting = await prisma.meeting.create({ data: parsed.data });
+  await logAudit(req.user, "CREATE_MEETING", "Meeting", meeting.id, `Created meeting "${meeting.title}"`);
   res.status(201).json(meeting);
 });
 
@@ -111,6 +113,13 @@ router.put("/:id/attendance", requireRole("ADMIN", "SECRETARY"), async (req, res
     })
   );
 
+  await logAudit(
+    req.user,
+    "SAVE_ATTENDANCE",
+    "Meeting",
+    id,
+    `Saved attendance for "${meeting.title}" (${present.size} present)`
+  );
   res.json({ ok: true, presentCount: present.size });
 });
 
